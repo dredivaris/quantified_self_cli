@@ -1,20 +1,25 @@
 import cmd
-from ming import create_datastore
-from controller.controller import SelfQuantifierController
+
+from controller.constants import Err
+from controller.decorators import parseargs
+from data.input import SelfQuantifierAPI
 
 doc = """
   Example of basic data entries:
   (date is automatically recorded as now if not specified with a date command)
 
-  create group mygroup
-  remove group mygroup
+  create mygroup
+  remove mygroup
 
   activate groupname
   act groupname
   add weight (after toggle of group that group is active, adding stuff will add to that group)
-  add height
-  deactivate groupname
-  dea groupname
+  add height 23.4 23 (add height item if doesnt exist and add value(s) to height)
+  link height group1 group2
+
+  add mass groupname
+  deactivate
+  dea (deactivate current group - resets to default)
 
   width 23.2 (prompt if doesnt exist or not sufficiently close to existing)
 
@@ -43,6 +48,7 @@ doc = """
 class SelfQuantifierCLI(cmd.Cmd):
   """Simple command processor example."""
   prompt = 'sq: '
+  input = SelfQuantifierAPI()
 
   def __init__(self):
     # self.ctrl = SelfQuantifierController()
@@ -62,18 +68,66 @@ class SelfQuantifierCLI(cmd.Cmd):
   def do_EOF(line):
     return True
 
-  @staticmethod
-  def do_create(line):
-    print(line)
-    return True
+  @parseargs(1)
+  def do_create(self, args):
+    group = args[0]
+    try:
+      created = self.input.create_group(group)
+    except Exception as e:
+      print(e)
 
-    # def main():
-    #   pp = pprint.PrettyPrinter(indent=4)
-    #   p = optparse.OptionParser()
-    # p.add_option('--multfile', '-m', default="")
-    # p.add_option('--num_to_print', '-n', default=-1)
-    # options, arguments = p.parse_args()
-    # print 'Hello %s' % options.person
+  @parseargs(1)
+  def do_remove(self, args):
+    group = args[0]
+    self.input.remove_group(group)
+
+  @parseargs(1)
+  def do_activate(self, args):
+    group = args[0]
+
+    if self.input.activate_group(group):
+      print('--- Group activated')
+    else:
+      print('--- Group not found')
+
+  def do_act(self, line):
+    return self.do_activate(line)
+
+  @parseargs(0)
+  def do_deactivate(self, args):
+    self.input.deactivate_group()
+
+  def do_dea(self, line):
+    return self.do_deactivate(line)
+
+  @parseargs(1, -1)
+  def do_add(self, args):
+    name, values = args[0], args[1:]
+    if values:
+      self.input.add_item(name, *values)
+      print('--- Added ', name, ' with: ', ', '.join(values))
+    else:
+      self.input.add_item(name)
+
+  @parseargs(2, -1)
+  def do_link(self, args):
+    name, groups = args[0], args[1:]
+    self.input.link_item(name, *groups)
+
+  def parseline(self, line):
+    # print ('parseline(%s) =>' % line, line )
+    # new_line = line.strip()
+    # if new_line:
+    #   command = line[0]
+    #   SelfQuantifierCLI
+
+    ret = cmd.Cmd.parseline(self, line)
+    command = ret[0]
+    if not getattr(self, 'do_' + command):
+      ret = ('add', command + ' ' + ret[1], command + ' ' + ret[2])
+    print(ret)
+    return ret
+
 
 if __name__ == '__main__':
   s = SelfQuantifierCLI()

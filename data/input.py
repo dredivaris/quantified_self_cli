@@ -32,42 +32,54 @@ class SelfQuantifierAPI(object):
       group = Group(name=name, item_order=[])
       session.flush()
     except DuplicateKeyError:
-      return False
+      raise Exception('--- That group already exists')
     return group
 
   def activate_group(self, name):
-    new_group = Group.query.get(name)
+    new_group = Group.query.get(name=name)
     if new_group:
       self.current_group = new_group
       return self.current_group
     else:
       return False
 
-  def deactivate_group(self, name):
+  def deactivate_group(self):
     self.set_default_group()
     return True
 
-  def add_item(self, name, group=None, value=None):
+  def add_item(self, name, *values):
     date = self.date or None
-    current_group = group if group else self.current_group.name
-
     # TODO: fuzzy logic search to avoid creating weird new items
 
     item = Item.query.get(name=name)
     if not item:
       item = Item(name=name, values=[], groups=[])
 
-    if group:
-      item.groups.append(group)
-      Group.query.get(group).item_order.append(item.name)
-
-    if not date and value:
+    if not date:
       date = datetime.now()
-    if value:
-      item.values.append([date, value])
+    if values:
+      for arg in values:
+        item.values.append([date, arg])
 
     session.flush()
     return item
+
+  def link_item(self, name, *args):
+    item = Item.query.get(name=name)
+    if not item:
+      item = Item(name=name, values=[], groups=[])
+
+    if args:
+      for arg in args:
+        group = Group.query.get(name=arg)
+        if not group:
+          Group(name=arg, item_order=[item.name])
+        else:
+          group.item_order.append(item.name)
+        item.groups.append(arg)
+
+    session.flush()
+    return item.groups
 
   def delete_item(self, name):
     item = Item.query.get(name=name)
@@ -92,7 +104,7 @@ class SelfQuantifierAPI(object):
       if group.name not in item.groups:
         item.groups.append(group.name)
 
-    session.flush
+    session.flush()
     return True
 
   def set_date(self, date):
