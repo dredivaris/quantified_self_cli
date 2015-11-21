@@ -115,19 +115,12 @@ class SelfQuantifierCLI(cmd.Cmd):
     self.input.link_item(name, *groups)
 
   def parseline(self, line):
-    # print ('parseline(%s) =>' % line, line )
-    # new_line = line.strip()
-    # if new_line:
-    #   command = line[0]
-    #   SelfQuantifierCLI
-
     ret = cmd.Cmd.parseline(self, line)
     command = ret[0]
     if not getattr(self, 'do_' + command):
       ret = ('add', command + ' ' + ret[1], command + ' ' + ret[2])
-    print(ret)
+    # print(ret)
     return ret
-
 
 if __name__ == '__main__':
   s = SelfQuantifierCLI()

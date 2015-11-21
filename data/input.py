@@ -81,7 +81,7 @@ class SelfQuantifierAPI(object):
     session.flush()
     return item.groups
 
-  def delete_item(self, name):
+  def remove_item(self, name):
     item = Item.query.get(name=name)
     if item:
       item.delete()
@@ -129,3 +129,8 @@ class SelfQuantifierAPI(object):
 
     self.date = date_val
     return self.date
+
+  def show_all_items(self):
+    items = Item.query.find({}).all()
+    print([i.name for i in items])
+
