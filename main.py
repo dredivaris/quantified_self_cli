@@ -17,7 +17,6 @@ doc = """
   add height 23.4 23 (add height item if doesnt exist and add value(s) to height)
   link height group1 group2
 
-  add mass groupname
   deactivate
   dea (deactivate current group - resets to default)
 
@@ -36,6 +35,9 @@ doc = """
   date 23 1:34 PM (assumes current month)
   date 1:34 PM (assumes current day)
 
+  list items
+  list groups
+
   h     (help documentation)
   help  (help documentation)
 
@@ -51,8 +53,12 @@ class SelfQuantifierCLI(cmd.Cmd):
   input = SelfQuantifierAPI()
 
   def __init__(self):
-    # self.ctrl = SelfQuantifierController()
+    self.set_prompt(self.input.current_group)
     super(SelfQuantifierCLI, self).__init__()
+
+  def set_prompt(self, current_group):
+    if current_group.name != 'default_group':
+      self.prompt = 'sq ({}): '.format(current_group.name)
 
   @staticmethod
   def do_greet(line):
@@ -89,6 +95,7 @@ class SelfQuantifierCLI(cmd.Cmd):
       print('--- Group activated')
     else:
       print('--- Group not found')
+    self.set_prompt(self.input.current_group)
 
   def do_act(self, line):
     return self.do_activate(line)
@@ -96,6 +103,7 @@ class SelfQuantifierCLI(cmd.Cmd):
   @parseargs(0)
   def do_deactivate(self, args):
     self.input.deactivate_group()
+    self.set_prompt(self.input.current_group)
 
   def do_dea(self, line):
     return self.do_deactivate(line)
@@ -114,13 +122,27 @@ class SelfQuantifierCLI(cmd.Cmd):
     name, groups = args[0], args[1:]
     self.input.link_item(name, *groups)
 
+  @parseargs(1)
+  def do_list(self, args):
+    list_target = args[0]
+    if 'items' in list_target:
+      print('--- Items:')
+      print('\n'.join(['  ' + i for i in self.input.show_all_items()]))
+    if 'groups' in list_target:
+      print('--- Groups:')
+      print('\n'.join(['  ' + i for i in self.input.show_all_groups()]))
+
+
   def parseline(self, line):
     ret = cmd.Cmd.parseline(self, line)
     command = ret[0]
-    if not getattr(self, 'do_' + command):
+    if command and not getattr(self, 'do_' + command):
       ret = ('add', command + ' ' + ret[1], command + ' ' + ret[2])
     # print(ret)
     return ret
+
+
+
 
 if __name__ == '__main__':
   s = SelfQuantifierCLI()

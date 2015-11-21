@@ -15,12 +15,17 @@ class SelfQuantifierAPI(object):
     else:
       new_group = Config.query.get(name=group)
       if new_group:
-        self.default_group = Config.query.get(name=group)
+        self.current_group = Config.query.get(name=group)
     return self.current_group
 
   def remove_group(self, name):
     group = Group.query.get(name=name)
+    name = group.name
     if group:
+      Item.query.update(
+          {'groups': {'$elemMatch': {'$in': [group.name]}}},
+          {'$pull': {'groups': {'$in': [group.name]}}},
+          {'multi': True})
       group.delete()
       session.flush()
       return True
@@ -64,6 +69,19 @@ class SelfQuantifierAPI(object):
     session.flush()
     return item
 
+  def remove_item(self, name):
+    item = Item.query.get(name=name)
+    if item:
+      Group.query.update(
+          {'item_order': {'$elemMatch': {'$in': [item.name]}}},
+          {'$pull': {'item_order': {'$in': [item.name]}}},
+          {'multi': True})
+      item.delete()
+      session.flush()
+      return True
+    else:
+      return False
+
   def link_item(self, name, *args):
     item = Item.query.get(name=name)
     if not item:
@@ -80,15 +98,6 @@ class SelfQuantifierAPI(object):
 
     session.flush()
     return item.groups
-
-  def remove_item(self, name):
-    item = Item.query.get(name=name)
-    if item:
-      item.delete()
-      session.flush()
-      return True
-    else:
-      return False
 
   def set_group_item_order(self, name, *args):
     group = Group.query.get(name=name)
@@ -132,5 +141,9 @@ class SelfQuantifierAPI(object):
 
   def show_all_items(self):
     items = Item.query.find({}).all()
-    print([i.name for i in items])
+    return [i.name for i in items]
+
+  def show_all_groups(self):
+    groups = Group.query.find({}).all()
+    return [i.name for i in groups]
 
