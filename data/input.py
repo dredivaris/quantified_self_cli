@@ -19,13 +19,14 @@ class SelfQuantifierAPI(object):
     return self.current_group
 
   def remove_group(self, name):
+    session.clear()
     group = Group.query.get(name=name)
-    name = group.name
+    if not group:
+      return
     if group:
       Item.query.update(
           {'groups': {'$elemMatch': {'$in': [group.name]}}},
-          {'$pull': {'groups': {'$in': [group.name]}}},
-          {'multi': True})
+          {'$pull': {'groups': {'$in': [group.name]}}}, multi=True)
       group.delete()
       session.flush()
       return True
@@ -62,7 +63,9 @@ class SelfQuantifierAPI(object):
 
     if not date:
       date = datetime.now()
+
     if values:
+      print (values)
       for arg in values:
         item.values.append([date, arg])
 
@@ -74,8 +77,7 @@ class SelfQuantifierAPI(object):
     if item:
       Group.query.update(
           {'item_order': {'$elemMatch': {'$in': [item.name]}}},
-          {'$pull': {'item_order': {'$in': [item.name]}}},
-          {'multi': True})
+          {'$pull': {'item_order': {'$in': [item.name]}}}, multi=True)
       item.delete()
       session.flush()
       return True
@@ -140,10 +142,30 @@ class SelfQuantifierAPI(object):
     return self.date
 
   def show_all_items(self):
+    session.clear()
     items = Item.query.find({}).all()
     return [i.name for i in items]
 
   def show_all_groups(self):
+    session.clear()
     groups = Group.query.find({}).all()
     return [i.name for i in groups]
+
+  def show_all_group_items(self, name):
+    session.clear()
+    group = Group.query.get(name=name)
+    if not group:
+      return ''
+    else:
+      return group.item_order
+
+  def show_all_item_groups(self, name):
+    session.clear()
+    item = Item.query.get(name=name)
+    if not item:
+      return ''
+    else:
+      return item.groups
+
+
 

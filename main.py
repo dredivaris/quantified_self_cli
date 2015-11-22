@@ -38,6 +38,9 @@ doc = """
   list items
   list groups
 
+  remove item itemname
+  remove group groupname
+
   h     (help documentation)
   help  (help documentation)
 
@@ -113,7 +116,10 @@ class SelfQuantifierCLI(cmd.Cmd):
     name, values = args[0], args[1:]
     if values:
       self.input.add_item(name, *values)
-      print('--- Added ', name, ' with: ', ', '.join(values))
+      if values:
+        print('--- Added', name, ' with: ', ', '.join(values))
+      else:
+        print('--- Added', name)
     else:
       self.input.add_item(name)
 
@@ -122,16 +128,30 @@ class SelfQuantifierCLI(cmd.Cmd):
     name, groups = args[0], args[1:]
     self.input.link_item(name, *groups)
 
-  @parseargs(1)
+  @parseargs(1, 2)
   def do_list(self, args):
     list_target = args[0]
     if 'items' in list_target:
       print('--- Items:')
       print('\n'.join(['  ' + i for i in self.input.show_all_items()]))
-    if 'groups' in list_target:
+    elif 'groups' in list_target:
       print('--- Groups:')
       print('\n'.join(['  ' + i for i in self.input.show_all_groups()]))
+    elif 'items' in args[1]:
+      print('--- Group items:')
+      print('\n'.join(['  ' + i for i in self.input.show_all_group_items(list_target)]))
+    elif 'groups' in args[1]:
+      print('--- Item groups:')
+      print('\n'.join(['  ' + i for i in self.input.show_all_item_groups(list_target)]))
 
+
+  @parseargs(2)
+  def do_remove(self, args):
+    type = args[0]
+    if type == 'item':
+      self.input.remove_item(args[1])
+    elif type == 'group':
+      self.input.remove_group(args[1])
 
   def parseline(self, line):
     ret = cmd.Cmd.parseline(self, line)
@@ -140,9 +160,6 @@ class SelfQuantifierCLI(cmd.Cmd):
       ret = ('add', command + ' ' + ret[1], command + ' ' + ret[2])
     # print(ret)
     return ret
-
-
-
 
 if __name__ == '__main__':
   s = SelfQuantifierCLI()
