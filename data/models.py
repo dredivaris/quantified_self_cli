@@ -25,7 +25,7 @@ class Item(MappedClass):
 
   _id = FieldProperty(schema.ObjectId)
   name = FieldProperty(schema.String, unique=True)
-  values = FieldProperty([[schema.DateTime, schema.String]])
+  values = FieldProperty([[]])
   groups = FieldProperty([schema.String])
 
 

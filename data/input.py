@@ -65,7 +65,6 @@ class SelfQuantifierAPI(object):
       date = datetime.now()
 
     if values:
-      print (values)
       for arg in values:
         item.values.append([date, arg])
 

@@ -116,12 +116,10 @@ class SelfQuantifierCLI(cmd.Cmd):
     name, values = args[0], args[1:]
     if values:
       self.input.add_item(name, *values)
-      if values:
-        print('--- Added', name, ' with: ', ', '.join(values))
-      else:
-        print('--- Added', name)
+      print('--- Added', name, 'with: ', ', '.join(values))
     else:
       self.input.add_item(name)
+      print('--- Added', name)
 
   @parseargs(2, -1)
   def do_link(self, args):
@@ -153,12 +151,26 @@ class SelfQuantifierCLI(cmd.Cmd):
     elif type == 'group':
       self.input.remove_group(args[1])
 
+  @parseargs(1, -1)
+  def do_seq_add(self, values):
+    items = self.input.show_all_group_items(self.input.current_group)
+    if len(values) != len(items):
+      print(Err.num_value_mismatch)
+    for item, value in zip(items, values):
+      self.input.add_item(item, value)
+
   def parseline(self, line):
     ret = cmd.Cmd.parseline(self, line)
+    print(ret)
     command = ret[0]
-    if command and not getattr(self, 'do_' + command):
-      ret = ('add', command + ' ' + ret[1], command + ' ' + ret[2])
-    # print(ret)
+    if command and not getattr(self, 'do_' + command, None):
+      # if the first word is an item, we are adding values to an item
+      if command in self.input.show_all_items():
+        ret = ('add', command + ' ' + ret[1], command + ' ' + ret[2])
+      # otherwise, we are sequentially adding values to group items
+      else:
+        ret = ('seq_add', ret[0] + ' ' + ret[1], ret[0] + ' ' + ret[1])
+
     return ret
 
 if __name__ == '__main__':
