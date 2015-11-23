@@ -13,10 +13,18 @@ class SelfQuantifierAPI(object):
     if not group:
       self.current_group = Config.query.get(name='default_group')
     else:
-      new_group = Config.query.get(name=group)
+      new_group = Config.query.get(name='default_group')
+      if not new_group:
+        new_group = Config(name='default_group')
+      new_group.value = group
+
       if new_group:
-        self.current_group = Config.query.get(name=group)
+        self.current_group = new_group
+        session.flush()
     return self.current_group
+
+  def exists_item(self, name):
+    return True if Item.query.get(name) else False
 
   def remove_group(self, name):
     session.clear()
@@ -167,5 +175,7 @@ class SelfQuantifierAPI(object):
     else:
       return item.groups
 
-
+  def show_all_item_values(self, name):
+    item = Item.query.get(name)
+    return item.values
 

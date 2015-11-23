@@ -4,7 +4,7 @@ from ming import schema
 from ming.odm import MappedClass
 from ming.odm import FieldProperty
 
-session = ThreadLocalODMSession(bind=create_datastore('self_quantifier'))
+session = ThreadLocalODMSession(bind=create_datastore('quantifier'))
 
 
 class Group(MappedClass):

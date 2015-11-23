@@ -1,4 +1,5 @@
 import cmd
+from datetime import datetime
 
 from controller.constants import Err
 from controller.decorators import parseargs
@@ -39,6 +40,8 @@ doc = """
   list items
   list groups
 
+  show itemname (show all values for item)
+
   remove item itemname
   remove group groupname
 
@@ -63,10 +66,6 @@ class SelfQuantifierCLI(cmd.Cmd):
   def set_prompt(self, current_group):
     if current_group and current_group.name != 'default_group':
       self.prompt = 'sq ({}): '.format(current_group.name)
-
-  @staticmethod
-  def do_greet(line):
-    print('hello')
 
   def do_quit(self, line):
     return self.do_EOF(line)
@@ -153,16 +152,37 @@ class SelfQuantifierCLI(cmd.Cmd):
 
   @parseargs(1, -1)
   def do_seq_add(self, values):
-    items = self.input.show_all_group_items(self.input.current_group)
-    if len(values) != len(items):
+    items = self.input.show_all_group_items(self.input.current_group.value)
+    if len(values) > len(items):
       print(Err.num_value_mismatch)
     for item, value in zip(items, values):
-      self.input.add_item(item, value)
-
+      if item and value and value != '_':
+        self.input.add_item(item, value)
 
   def do_date(self, line):
-    self.input.set_date(line)
-    print(self.input.date)
+    if line:
+      self.input.set_date(line)
+      print(self.input.date)
+    print(datetime.now())
+
+  @parseargs(1)
+  def do_setglobal(self, args):
+    self.input.set_default_group(group=args[0])
+
+  @parseargs(1)
+  def do_show(self, args):
+    item = args[0]
+    values = self.input.show_all_item_values(item)
+    print(values)
+
+  @parseargs(2, -1)
+  def do_linkgroup(self, args):
+    group = args[0]
+    items = args[1:]
+    for item in items:
+      if not self.input.exists_item(item):
+        self.input.add_item(item)
+      self.input.link_item(item, *[group])
 
   def parseline(self, line):
     ret = cmd.Cmd.parseline(self, line)
@@ -173,7 +193,7 @@ class SelfQuantifierCLI(cmd.Cmd):
         ret = ('add', command + ' ' + ret[1], command + ' ' + ret[2])
       # otherwise, we are sequentially adding values to group items
       else:
-        ret = ('seq_add', ret[0] + ' ' + ret[1], ret[0] + ' ' + ret[1])
+        ret = ('seq_add', ret[0] + ret[1], ret[0] + ' ' + ret[1])
 
     return ret
 
