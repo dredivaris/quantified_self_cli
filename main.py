@@ -165,7 +165,8 @@ class SelfQuantifierCLI(cmd.Cmd):
     if line:
       self.input.set_date(line)
       print(self.input.date.strftime(date_display))
-    print(datetime.now().strftime(date_display))
+    else:
+      print(datetime.now().strftime(date_display))
 
   @parseargs(1)
   def do_setglobal(self, args):
