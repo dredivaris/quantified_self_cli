@@ -119,7 +119,8 @@ class SelfQuantifierAPI(object):
 
   def set_date(self, date):
     date_val = None
-    for format in ('%m %d %y %I:%M %p', '%m %d %I:%M %p', '%d %I:%M %p', '%I:%M %p'):
+    for format in ('%m %d %y', '%m %d %Y', '%m %d %y %I:%M %p', '%m %d %I:%M %p', '%d %I:%M %p',
+                   '%I:%M %p'):
       try:
         date_val = datetime.strptime(date, format)
         if format == '%m %d %I:%M %p':

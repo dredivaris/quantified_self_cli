@@ -30,6 +30,7 @@ doc = """
 
   setglobal workout (sets group as the global default - automatically activated when launched)
 
+  date 3 23 16
   date 3 23 15 1:34 PM
   date 3 23 1:34 PM (assumes current year)
   date 23 1:34 PM (assumes current month)
@@ -142,7 +143,6 @@ class SelfQuantifierCLI(cmd.Cmd):
       print('--- Item groups:')
       print('\n'.join(['  ' + i for i in self.input.show_all_item_groups(list_target)]))
 
-
   @parseargs(2)
   def do_remove(self, args):
     type = args[0]
@@ -159,9 +159,13 @@ class SelfQuantifierCLI(cmd.Cmd):
     for item, value in zip(items, values):
       self.input.add_item(item, value)
 
+
+  def do_date(self, line):
+    self.input.set_date(line)
+    print(self.input.date)
+
   def parseline(self, line):
     ret = cmd.Cmd.parseline(self, line)
-    print(ret)
     command = ret[0]
     if command and not getattr(self, 'do_' + command, None):
       # if the first word is an item, we are adding values to an item
