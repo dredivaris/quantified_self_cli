@@ -61,7 +61,7 @@ class SelfQuantifierCLI(cmd.Cmd):
     super(SelfQuantifierCLI, self).__init__()
 
   def set_prompt(self, current_group):
-    if current_group.name != 'default_group':
+    if current_group and current_group.name != 'default_group':
       self.prompt = 'sq ({}): '.format(current_group.name)
 
   @staticmethod
