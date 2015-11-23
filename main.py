@@ -203,6 +203,11 @@ class SelfQuantifierCLI(cmd.Cmd):
 
     return ret
 
+  @parseargs(1)
+  def do_undolast(self, args):
+    # TODO
+    pass
+
   def emptyline(self):
     return
 

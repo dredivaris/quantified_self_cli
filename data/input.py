@@ -128,19 +128,21 @@ class SelfQuantifierAPI(object):
 
   def set_date(self, date):
     date_val = None
-    for format in ('%m %d', '%m %d %y', '%m %d %Y', '%m %d %y %I:%M %p', '%m %d %I:%M %p',
+    for format_val in ('%m %d', '%m %d %y', '%m %d %Y', '%m %d %y %I:%M %p', '%m %d %I:%M %p',
                    '%d %I:%M %p', '%I:%M %p'):
       try:
-        date_val = datetime.strptime(date, format)
-        if format == '%m %d %I:%M %p':
-          date_val.replace(year=datetime.now().year)
-        if format == '%d %I:%M %p':
-          date_val.replace(year=datetime.now().year)
-          date_val.replace(month=datetime.now().month)
-        if format == '%I:%M %p':
-          date_val.replace(year=datetime.now().year)
-          date_val.replace(month=datetime.now().month)
-          date_val.replace(day=datetime.now().day)
+        date_val = datetime.strptime(date, format_val)
+        if format_val == '%m %d':
+          date_val = date_val.replace(year=datetime.now().year)
+        if format_val == '%m %d %I:%M %p':
+          date_val = date_val.replace(year=datetime.now().year)
+        if format_val == '%d %I:%M %p':
+          date_val = date_val.replace(month=datetime.now().month, year=datetime.now().year)
+        if format_val == '%I:%M %p':
+          date_val = date_val.replace(
+              day=datetime.now().day,
+              month=datetime.now().month,
+              year=datetime.now().year)
         break
       except:
         pass
@@ -148,6 +150,7 @@ class SelfQuantifierAPI(object):
       return False
 
     self.date = date_val
+    print('set date', self.date)
     return self.date
 
   def show_all_items(self):
