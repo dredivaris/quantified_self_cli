@@ -74,6 +74,7 @@ class SelfQuantifierAPI(object):
 
     if values:
       for arg in values:
+        print('  adding ', arg, ' to ', item.name)
         item.values.append([date, arg])
 
     session.flush()
@@ -127,8 +128,8 @@ class SelfQuantifierAPI(object):
 
   def set_date(self, date):
     date_val = None
-    for format in ('%m %d %y', '%m %d %Y', '%m %d %y %I:%M %p', '%m %d %I:%M %p', '%d %I:%M %p',
-                   '%I:%M %p'):
+    for format in ('%m %d', '%m %d %y', '%m %d %Y', '%m %d %y %I:%M %p', '%m %d %I:%M %p',
+                   '%d %I:%M %p', '%I:%M %p'):
       try:
         date_val = datetime.strptime(date, format)
         if format == '%m %d %I:%M %p':
@@ -176,6 +177,5 @@ class SelfQuantifierAPI(object):
       return item.groups
 
   def show_all_item_values(self, name):
-    item = Item.query.get(name)
+    item = Item.query.get(name=name)
     return item.values
-

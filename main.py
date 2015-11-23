@@ -31,6 +31,7 @@ doc = """
 
   setglobal workout (sets group as the global default - automatically activated when launched)
 
+  date 3 23
   date 3 23 16
   date 3 23 15 1:34 PM
   date 3 23 1:34 PM (assumes current year)
@@ -53,6 +54,7 @@ doc = """
 
 """
 
+date_display = '%m/%d/%Y %I:%m %p'
 
 class SelfQuantifierCLI(cmd.Cmd):
   """Simple command processor example."""
@@ -162,8 +164,8 @@ class SelfQuantifierCLI(cmd.Cmd):
   def do_date(self, line):
     if line:
       self.input.set_date(line)
-      print(self.input.date)
-    print(datetime.now())
+      print(self.input.date.strftime(date_display))
+    print(datetime.now().strftime(date_display))
 
   @parseargs(1)
   def do_setglobal(self, args):
@@ -173,7 +175,10 @@ class SelfQuantifierCLI(cmd.Cmd):
   def do_show(self, args):
     item = args[0]
     values = self.input.show_all_item_values(item)
-    print(values)
+    for val in values:
+      date = val[0]
+      value = val[1]
+      print('  ' + value + '  --  ' + date.strftime(date_display))
 
   @parseargs(2, -1)
   def do_linkgroup(self, args):
@@ -196,6 +201,9 @@ class SelfQuantifierCLI(cmd.Cmd):
         ret = ('seq_add', ret[0] + ret[1], ret[0] + ' ' + ret[1])
 
     return ret
+
+  def emptyline(self):
+    return
 
 if __name__ == '__main__':
   s = SelfQuantifierCLI()
