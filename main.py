@@ -177,8 +177,8 @@ class SelfQuantifierCLI(cmd.Cmd):
     item = args[0]
     values = self.input.show_all_item_values(item)
     for val in values:
-      date = val[0]
-      value = val[1]
+      date = val['timestamp']
+      value = val['value']
       print('  ' + value + '  --  ' + date.strftime(date_display))
 
   @parseargs(2, -1)
@@ -199,8 +199,7 @@ class SelfQuantifierCLI(cmd.Cmd):
         ret = ('add', command + ' ' + ret[1], command + ' ' + ret[2])
       # otherwise, we are sequentially adding values to group items
       else:
-        ret = ('seq_add', ret[0] + ret[1], ret[0] + ' ' + ret[1])
-
+        ret = ('seq_add', ret[2], ret[2])
     return ret
 
   @parseargs(1)
@@ -214,5 +213,7 @@ class SelfQuantifierCLI(cmd.Cmd):
 if __name__ == '__main__':
   s = SelfQuantifierCLI()
   s.cmdloop()
+
+
 
 

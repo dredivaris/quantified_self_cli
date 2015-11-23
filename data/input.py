@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from pymongo.errors import DuplicateKeyError
 from data.models import session, Group, Config, Item
@@ -75,7 +75,7 @@ class SelfQuantifierAPI(object):
     if values:
       for arg in values:
         print('  adding ', arg, ' to ', item.name)
-        item.values.append([date, arg])
+        item.values.append({'timestamp': date, 'value': arg})
 
     session.flush()
     return item
@@ -181,4 +181,17 @@ class SelfQuantifierAPI(object):
 
   def show_all_item_values(self, name):
     item = Item.query.get(name=name)
+    print(item)
     return item.values
+
+  # TODO: why doesnt this work?
+  def remove_value_on_day(self, name, date):
+    next_day = date + timedelta(days=1)
+    print('between', date, next_day)
+    resp = Item.query.update(
+        {'name': name},
+        {'$pull': {'values': {'elemMatch': {'timestamp': {'$gte': date, '$lte': next_day}}}}},
+        multi=True
+    )
+    print(resp)
+    session.flush()
