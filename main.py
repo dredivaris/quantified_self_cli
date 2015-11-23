@@ -157,9 +157,7 @@ class SelfQuantifierCLI(cmd.Cmd):
     items = self.input.show_all_group_items(self.input.current_group.value)
     if len(values) > len(items):
       print(Err.num_value_mismatch)
-    for item, value in zip(items, values):
-      if item and value and value != '_':
-        self.input.add_item(item, value)
+    self.input.add_items(list(zip(items, values)))
 
   def do_date(self, line):
     if line:
@@ -189,6 +187,9 @@ class SelfQuantifierCLI(cmd.Cmd):
       if not self.input.exists_item(item):
         self.input.add_item(item)
       self.input.link_item(item, *[group])
+
+  def do_undo(self, args):
+    self.input.remove_last_addition()
 
   def parseline(self, line):
     ret = cmd.Cmd.parseline(self, line)

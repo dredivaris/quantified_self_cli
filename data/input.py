@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 
 from pymongo.errors import DuplicateKeyError
+
+from controller.decorators import store_last_action
 from data.models import session, Group, Config, Item
 
 
@@ -61,6 +63,7 @@ class SelfQuantifierAPI(object):
     self.set_default_group()
     return True
 
+  @store_last_action()
   def add_item(self, name, *values):
     date = self.date or None
     # TODO: fuzzy logic search to avoid creating weird new items
@@ -79,6 +82,12 @@ class SelfQuantifierAPI(object):
 
     session.flush()
     return item
+
+  @store_last_action()
+  def add_items(self, items_values):
+    for item, value in items_values:
+      if item and value and value != '_':
+        self.add_item(item, value)
 
   def remove_item(self, name):
     item = Item.query.get(name=name)
@@ -195,3 +204,19 @@ class SelfQuantifierAPI(object):
     )
     print(resp)
     session.flush()
+
+  def remove_last_addition(self):
+    if hasattr(self, 'last_action') and self.last_action:
+      print(self.last_action['func'])
+      if self.last_action['func'].__name__ == self.add_items.__name__:
+        items_values = self.last_action['args'][0]
+        for name, value in items_values:
+          item = Item.query.get(name=name)
+          item.values.pop()
+      if self.last_action['func'].__name__ == self.add_item.__name__:
+        name, values = self.last_action['args'][0], self.last_action['args'][1:]
+        print(name, values)
+        item = Item.query.get(name=name)
+        for val in values:
+          item.values.pop()
+      session.flush()
