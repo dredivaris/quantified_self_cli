@@ -215,7 +215,6 @@ class SelfQuantifierAPI(object):
           item.values.pop()
       if self.last_action['func'].__name__ == self.add_item.__name__:
         name, values = self.last_action['args'][0], self.last_action['args'][1:]
-        print(name, values)
         item = Item.query.get(name=name)
         for val in values:
           item.values.pop()
