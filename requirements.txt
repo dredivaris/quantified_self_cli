@@ -2,6 +2,7 @@ pymongo
 ming
 scikit-learn
 fuzzywuzzy
+pytest
 
 # may need to install it on its own
 numpy==1.9.2
