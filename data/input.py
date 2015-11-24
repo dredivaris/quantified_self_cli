@@ -14,15 +14,20 @@ class SelfQuantifierAPI(object):
   def set_default_group(self, group=None):
     if not group:
       self.current_group = Config.query.get(name='default_group')
+      if not self.current_group:
+        self.current_group = Config(name='default_group', value='---')
+        session.flush()
+      self.current_group = self.current_group.value
     else:
       new_group = Config.query.get(name='default_group')
       if not new_group:
-        new_group = Config(name='default_group')
+        new_group = Config(name='default_group', value='---')
       new_group.value = group
 
       if new_group:
-        self.current_group = new_group
+        self.current_group = new_group.value
         session.flush()
+
     return self.current_group
 
   def exists_item(self, name):
@@ -54,7 +59,7 @@ class SelfQuantifierAPI(object):
   def activate_group(self, name):
     new_group = Group.query.get(name=name)
     if new_group:
-      self.current_group = new_group
+      self.current_group = new_group.name
       return self.current_group
     else:
       return False
@@ -206,7 +211,6 @@ class SelfQuantifierAPI(object):
 
   def remove_last_addition(self):
     if hasattr(self, 'last_action') and self.last_action:
-      print(self.last_action['func'])
       if self.last_action['func'].__name__ == self.add_items.__name__:
         items_values = self.last_action['args'][0]
         for name, value in items_values:
@@ -218,3 +222,6 @@ class SelfQuantifierAPI(object):
         for val in values:
           item.values.pop()
       session.flush()
+
+  def count_item_values(self, name):
+    return len(Item.query.get(name=name).values)

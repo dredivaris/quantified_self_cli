@@ -6,7 +6,7 @@ def parseargs(length, end_length=None):
   def _dec(func):
     @wraps(func)
     def _parse(self, line):
-      args = line.split(' ')
+      args = line.split(' ') if line else []
       if end_length is None:
         if len(args) == 1 and not args[0] and length != 0:
           print(Err.no_arguments_provided)

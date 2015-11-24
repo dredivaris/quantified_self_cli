@@ -66,8 +66,7 @@ class SelfQuantifierCLI(cmd.Cmd):
     super(SelfQuantifierCLI, self).__init__()
 
   def set_prompt(self, current_group):
-    if current_group and current_group.name != 'default_group':
-      self.prompt = 'sq ({}): '.format(current_group.name)
+    self.prompt = 'sq ({}): '.format(current_group)
 
   def do_quit(self, line):
     return self.do_EOF(line)
@@ -88,11 +87,6 @@ class SelfQuantifierCLI(cmd.Cmd):
       print(e)
 
   @parseargs(1)
-  def do_remove(self, args):
-    group = args[0]
-    self.input.remove_group(group)
-
-  @parseargs(1)
   def do_activate(self, args):
     group = args[0]
 
@@ -104,6 +98,10 @@ class SelfQuantifierCLI(cmd.Cmd):
 
   def do_act(self, line):
     return self.do_activate(line)
+
+  @parseargs(0)
+  def do_current(self, args):
+    print(self.input.current_group)
 
   @parseargs(0)
   def do_deactivate(self, args):
@@ -154,7 +152,7 @@ class SelfQuantifierCLI(cmd.Cmd):
 
   @parseargs(1, -1)
   def do_seq_add(self, values):
-    items = self.input.show_all_group_items(self.input.current_group.value)
+    items = self.input.show_all_group_items(self.input.current_group)
     if len(values) > len(items):
       print(Err.num_value_mismatch)
     self.input.add_items(list(zip(items, values)))
@@ -207,6 +205,11 @@ class SelfQuantifierCLI(cmd.Cmd):
   def do_undolast(self, args):
     # TODO
     pass
+
+  @parseargs(1)
+  def do_countvalues(self, args):
+    print(self.input.count_item_values(args[0]))
+
 
   def emptyline(self):
     return
