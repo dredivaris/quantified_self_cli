@@ -159,7 +159,6 @@ class SelfQuantifierAPI(object):
       return False
 
     self.date = date_val
-    print('set date', self.date)
     return self.date
 
   def show_all_items(self):
