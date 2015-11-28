@@ -1,7 +1,7 @@
 import cmd
 from datetime import datetime
 
-from controller.constants import Err
+from controller.constants import Err, date_display
 from controller.decorators import parseargs
 from data.input import SelfQuantifierAPI
 
@@ -54,7 +54,6 @@ doc = """
 
 """
 
-date_display = '%m/%d/%Y %I:%m %p'
 
 class SelfQuantifierCLI(cmd.Cmd):
   """Simple command processor example."""
@@ -160,6 +159,8 @@ class SelfQuantifierCLI(cmd.Cmd):
   def do_date(self, line):
     if line:
       self.input.set_date(line)
+      print(self.input.date.strftime(date_display))
+    elif self.input.date:
       print(self.input.date.strftime(date_display))
     else:
       print(datetime.now().strftime(date_display))

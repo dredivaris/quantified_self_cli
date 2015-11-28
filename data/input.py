@@ -4,6 +4,7 @@ from pymongo.errors import DuplicateKeyError
 
 from controller.decorators import store_last_action
 from data.models import session, Group, Config, Item
+from controller.constants import date_display
 
 
 class SelfQuantifierAPI(object):
@@ -93,6 +94,12 @@ class SelfQuantifierAPI(object):
     for item, value in items_values:
       if item and value and value != '_':
         self.add_item(item, value)
+
+    if self.date:
+      print('  on ', self.date.strftime(date_display))
+    else:
+      print('  on ', datetime.now().strftime(date_display))
+
 
   def remove_item(self, name):
     item = Item.query.get(name=name)
